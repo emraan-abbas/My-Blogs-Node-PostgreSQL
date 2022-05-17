@@ -13,9 +13,12 @@ exports.createBlogs = async (req, res) => {
 
     // If Validation is TRUE
     const { blogs } = Model
+    const { users } = Model
+    let user = await users.findOne({ where: { uuid: req.body.userUUID } })
     let blogsSaved = await blogs.create({
       title: req.body.title,
       description: req.body.description,
+      userId: user.id
     });
     return res.status(201).json({
       message: 'Blog Created Successfully', blogsSaved
@@ -23,7 +26,7 @@ exports.createBlogs = async (req, res) => {
 
   }
   catch (error) {
-    console.log('=======', error)
+    // console.log('=======', error)
     return res.status(401).json({
       message: 'Error at Create Blog !', error
     });
@@ -33,7 +36,7 @@ exports.createBlogs = async (req, res) => {
 // Get Blogs
 exports.getBlogs = async (req, res) => {
   try {
-    const allBlogs = await Model.blogs.findAll();
+    const allBlogs = await Model.blogs.findAll({ include: [Model.users] }); //INCLUDE means INCLUDE USERS from USER Model when Get request
     if (allBlogs) {
       return res.status(200).json({
         message: 'Here is the list of all blogs.',
